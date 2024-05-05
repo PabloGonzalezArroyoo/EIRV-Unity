@@ -7,7 +7,6 @@ using UnityEngine.XR.Interaction.Toolkit;
 
 public class CatComponent : MonoBehaviour
 {
-    XRGrabInteractable grab;
     NavMeshAgent agent;
     Animator anim;
     AudioSource audioSource;
@@ -22,30 +21,24 @@ public class CatComponent : MonoBehaviour
     void Start()
     {
         agent = GetComponent<NavMeshAgent>();
-        grab = GetComponent<XRGrabInteractable>();
-        anim = GetComponent<Animator>();   
+        anim = GetComponentInChildren<Animator>();   
         audioSource = GetComponent<AudioSource>();
         timer = 0;
         nextTime = Random.Range(1.0f, 4.5f);
+        agent.isStopped = false;
+        anim.SetBool("movimiento", false);
     }
 
     // Update is called once per frame
     void Update()
     {
-        if (grab.isSelected) 
-        {
-           anim.SetBool("aupar",true);
-        }
-        else
+        if (!anim.GetBool("acariciar"))
         {
             if (timer >= nextTime)
             {
                 if (agent.isStopped)
                 {
-                    Vector3 moveDirection = RandomNavMeshPoint();
-                    Quaternion targetRotation = Quaternion.LookRotation(moveDirection, Vector3.up);
                     agent.SetDestination(RandomNavMeshPoint());
-                    transform.rotation = targetRotation;
                     agent.isStopped = false;
                     anim.SetBool("movimiento", true);
                     PlaySound(meow);
@@ -67,9 +60,8 @@ public class CatComponent : MonoBehaviour
 
     Vector3 RandomNavMeshPoint()
     {
-        NavMeshHit hit;
         Vector3 randomPoint = Vector3.zero;
-        if (NavMesh.SamplePosition(transform.position + Random.insideUnitSphere * 10, out hit, 10.0f, NavMesh.AllAreas))
+        if (NavMesh.SamplePosition(transform.position + Random.insideUnitSphere * 10, out NavMeshHit hit, 10.0f, NavMesh.AllAreas))
         {
             randomPoint = hit.position;
         }
@@ -81,5 +73,30 @@ public class CatComponent : MonoBehaviour
     {
         audioSource.clip = clip;
         audioSource.Play();
+    }
+
+    public void BeginPet() 
+    {
+        PlaySound(prrr);
+        audioSource.loop = true;
+        anim.SetBool("acariciar", true);
+        agent.isStopped = true;
+    }
+
+    public void EndPet()
+    {
+        audioSource.Stop();
+        audioSource.loop = false;
+        anim.SetBool("acariciar", false);
+    }
+
+    public void BeginGrab() 
+    {
+        anim.SetTrigger("aupar");
+    }
+
+    public void EndGrab()
+    {
+        anim.SetTrigger("finAupar");
     }
 }
