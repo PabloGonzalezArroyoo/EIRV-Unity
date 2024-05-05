@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.XR.CoreUtils;
 using UnityEngine;
 using UnityEngine.XR.Interaction.Toolkit;
 
@@ -19,6 +20,8 @@ public class WeatherChangeComponent : MonoBehaviour
     [SerializeField] private AudioSource ambient;
     [SerializeField] private AudioClip natureClip;
     [SerializeField] private AudioClip rainClip;
+
+    [SerializeField] private GameObject lightsParetn;
 
     bool rain = false;
     bool holding = false;
@@ -39,12 +42,25 @@ public class WeatherChangeComponent : MonoBehaviour
 
         ambient.clip = rain ? rainClip : natureClip;
         ambient.Play();
+
+        List<GameObject> list = new List<GameObject>();
+        lightsParetn.GetChildGameObjects(list);
+        foreach (GameObject g in list)
+        {
+            g.SetActive(rain);
+        }
     }
 
     // Start is called before the first frame update
     void Start()
     {
         grabInteractable = GetComponent<XRGrabInteractable>();
+        List<GameObject> list = new List<GameObject>();
+        lightsParetn.GetChildGameObjects(list);
+        foreach (GameObject g in list)
+        {
+            g.SetActive(false);
+        }
     }
 
     // Update is called once per frame
